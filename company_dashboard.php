@@ -29,9 +29,15 @@ $company_name = $_SESSION['company_name'];
 
 // Get all flights for this company
 $flights_query = "
-    SELECT f.flight_id, f.departure_date, f.seats_no, 
-           a1.airport_code as from_code, a1.City as from_place, a1.State as from_state,
-           a2.airport_code as to_code, a2.City as to_place, a2.State as to_state,
+    SELECT f.flight_id,
+           f.departure_date,
+           f.seats_no, 
+           a1.airport_code as from_code,
+           a1.City as from_place,
+           a1.State as from_state,
+           a2.airport_code as to_code,
+           a2.City as to_place,
+           a2.State as to_state,
            COALESCE(b.booked_seats, 0) as booked_seats
     FROM Flights f
     JOIN Airports a1 ON f.from_airport_code = a1.airport_code
@@ -100,7 +106,17 @@ $conn->close();
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #ABD2FA;
+        }
+
+        .header {
+            background-color: #091540;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .container {
@@ -111,7 +127,7 @@ $conn->close();
         }
         
         header {
-            background-color: #333;
+            background-color: #091540;
             color: #fff;
             padding: 1rem;
             display: flex;

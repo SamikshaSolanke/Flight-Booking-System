@@ -11,9 +11,19 @@
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
         }
+
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
         
         body {
-            background-color: #f5f5f5;
+            background-color: #ABD2FA;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -100,6 +110,15 @@
     </style>
 </head>
 <body>
+    <!-- <header class="header">
+        <div class="logo">SkyConnect</div>
+        <nav class="nav">
+            <a href="index.php" class="nav-link">Home</a>
+            <a href="login.php" class="nav-link">User Login</a>
+            <a href="company_login.php" class="nav-link">Company Login</a>
+            <a href="#about" class="nav-link">About</a>
+        </nav>
+    </header> -->
     <div class="container">
         <h1>Create an Account</h1>
         

@@ -70,6 +70,17 @@ $conn->close();
             padding: 20px;
             text-align: center;
         }
+
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
         .confirmation {
             background-color: #f4f4f4;
             padding: 20px;
@@ -86,6 +97,15 @@ $conn->close();
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="logo">SkyConnect</div>
+        <nav class="nav">
+            <a href="index.php" class="nav-link">Home</a>
+            <a href="login.php" class="nav-link">User Login</a>
+            <a href="company_login.php" class="nav-link">Company Login</a>
+            <a href="#about" class="nav-link">About</a>
+        </nav>
+    </header>
     <div class="confirmation">
         <h2>Booking Status</h2>
         <p>Please check the status message above.</p>

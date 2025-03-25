@@ -13,14 +13,14 @@
         }
         
         body {
-            background-color: #f5f5f5;
+            background-color: #ABD2FA;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             background-color: white;
             border-radius: 8px;

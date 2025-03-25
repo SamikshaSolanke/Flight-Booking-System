@@ -13,13 +13,13 @@
         }
         
         body {
-            background-color: #f5f5f5;
+            background-color: #ABD2FA;
             color: #333;
             line-height: 1.6;
         }
         
         .header {
-            background-color: #4a90e2;
+            background-color: #091540;
             color: white;
             padding: 1rem 2rem;
             display: flex;
@@ -51,10 +51,10 @@
         }
         
         .hero {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/600');
+            background-image: url('i6.jpeg');
             background-size: cover;
             background-position: center;
-            height: 60vh;
+            height: 40vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -65,7 +65,7 @@
         }
         
         .hero h1 {
-            font-size: 3rem;
+            font-size: 4rem;
             margin-bottom: 1rem;
         }
         
@@ -107,7 +107,7 @@
         }
         
         .options-section {
-            padding: 4rem 2rem;
+            padding: 3rem 1rem;
             text-align: center;
         }
         
@@ -215,11 +215,11 @@
     <main>
         <section class="hero">
             <h1>Welcome to SkyConnect</h1>
-            <p>Your one-stop solution for booking flights at the best prices. Connect with airlines directly and manage your travel with ease.</p>
-            <div class="cta-buttons">
+            <!-- <p>Your one-stop solution for booking flights at the best prices. Connect with airlines directly and manage your travel with ease.</p> -->
+            <!-- <div class="cta-buttons">
                 <a href="#options" class="btn">Get Started</a>
                 <a href="#about" class="btn btn-outline">Learn More</a>
-            </div>
+            </div> -->
         </section>
         
         <section id="options" class="options-section">
@@ -245,7 +245,7 @@
             </div>
         </section>
         
-        <section id="about" class="options-section" style="background-color: #f9f9f9;">
+        <!-- <section id="about" class="options-section" style="background-color: #f9f9f9;">
             <h2>Why Choose SkyConnect?</h2>
             <div class="options-container">
                 <div class="option-card">
@@ -272,7 +272,7 @@
                     <a href="company_signup.php" class="btn btn-primary">Join as Airline</a>
                 </div>
             </div>
-        </section>
+        </section> -->
     </main>
     
     <footer class="footer">

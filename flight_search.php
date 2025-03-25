@@ -29,7 +29,17 @@ if (!$airport_result) {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #ABD2FA;
         }
+        /* .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        } */
         .search-form {
             background-color: #f4f4f4;
             padding: 20px;
@@ -52,6 +62,15 @@ if (!$airport_result) {
     </style>
 </head>
 <body>
+    <!-- <header class="header">
+        <div class="logo">SkyConnect</div>
+        <nav class="nav">
+            <a href="index.php" class="nav-link">Home</a>
+            <a href="login.php" class="nav-link">User Login</a>
+            <a href="company_login.php" class="nav-link">Company Login</a>
+            <a href="#about" class="nav-link">About</a>
+        </nav>
+    </header> -->
     <div class="search-form">
         <h2>Search Flights</h2>
         <form method="POST" action="flight_results.php">
@@ -72,6 +91,8 @@ if (!$airport_result) {
                 }
                 ?>
             </select>
+            <br>
+            <br>
 
             <label for="to_location">To:</label>
             <select name="to_location" required>
@@ -90,9 +111,13 @@ if (!$airport_result) {
                 }
                 ?>
             </select>
+            <br>
+            <br>
 
             <label for="flight_date">Date:</label>
             <input type="date" name="flight_date" required>
+            <br>
+            <br>
 
             <input type="submit" value="Search Flights">
         </form>

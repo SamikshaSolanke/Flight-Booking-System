@@ -22,8 +22,10 @@ $bookings_query = "
         b.booking_date, 
         f.departure_date, 
         c.company_name, 
-        a1.from_place AS departure_location, 
-        a2.to_place AS arrival_location
+        a1.airport_code as from_code, 
+        a1.City as from_place,
+        a2.airport_code as to_code,
+        a2.City as to_place
     FROM 
         Bookings b
     JOIN 
@@ -55,10 +57,21 @@ $result = $stmt->get_result();
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #ABD2FA;
             margin: 0;
             padding: 20px;
         }
+
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
         .container {
             background-color: white;
             border-radius: 8px;
@@ -97,6 +110,17 @@ $result = $stmt->get_result();
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="logo">SkyConnect</div>
+        <nav class="nav">
+            <a href="index.php" class="nav-link">Home</a>
+            <a href="login.php" class="nav-link">User Login</a>
+            <a href="company_login.php" class="nav-link">Company Login</a>
+            <a href="#about" class="nav-link">About</a>
+        </nav>
+    </header>
+    <br>
+    <br>
     <div class="container">
         <h1>My Flight Bookings</h1>
         
@@ -121,10 +145,10 @@ $result = $stmt->get_result();
                     </div>
                     <div class="booking-details">
                         <div>
-                            <strong>From:</strong> <?php echo htmlspecialchars($booking['departure_location']); ?>
+                            <strong>From:</strong> <?php echo htmlspecialchars($booking['from_place']); ?> (<?php echo htmlspecialchars($booking['from_code']); ?>)
                         </div>
                         <div>
-                            <strong>To:</strong> <?php echo htmlspecialchars($booking['arrival_location']); ?>
+                            <strong>To:</strong> <?php echo htmlspecialchars($booking['to_place']); ?> (<?php echo htmlspecialchars($booking['to_code']); ?>)
                         </div>
                     </div>
                 </div>

@@ -41,6 +41,15 @@ $result = $stmt->get_result();
             margin: 0 auto;
             padding: 20px;
         }
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
         .flight-card {
             border: 1px solid #ddd;
             padding: 15px;
@@ -59,6 +68,15 @@ $result = $stmt->get_result();
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="logo">SkyConnect</div>
+        <nav class="nav">
+            <a href="index.php" class="nav-link">Home</a>
+            <a href="login.php" class="nav-link">User Login</a>
+            <a href="company_login.php" class="nav-link">Company Login</a>
+            <a href="#about" class="nav-link">About</a>
+        </nav>
+    </header>
     <h2>Available Flights</h2>
     <?php if ($result->num_rows > 0): ?>
         <?php while ($flight = $result->fetch_assoc()): ?>
