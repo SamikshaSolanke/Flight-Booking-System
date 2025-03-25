@@ -1,0 +1,147 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Database connection
+$conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch user's bookings
+$bookings_query = "
+    SELECT 
+        b.booking_id, 
+        b.booking_date, 
+        f.departure_date, 
+        c.company_name, 
+        a1.from_place AS departure_location, 
+        a2.to_place AS arrival_location
+    FROM 
+        Bookings b
+    JOIN 
+        Flights f ON b.flight_id = f.flight_id
+    JOIN 
+        Companies c ON f.company_id = c.company_id
+    JOIN 
+        Airports a1 ON f.from_airport_code = a1.airport_code
+    JOIN 
+        Airports a2 ON f.to_airport_code = a2.airport_code
+    WHERE 
+        b.user_id = ?
+    ORDER BY 
+        b.booking_date DESC
+";
+
+$stmt = $conn->prepare($bookings_query);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .booking-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .booking-details {
+            display: flex;
+            justify-content: space-between;
+        }
+        .no-bookings {
+            text-align: center;
+            color: #666;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #4a90e2;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Flight Bookings</h1>
+        
+        <?php if ($result->num_rows > 0): ?>
+            <?php while ($booking = $result->fetch_assoc()): ?>
+                <div class="booking-card">
+                    <div class="booking-details">
+                        <div>
+                            <strong>Booking ID:</strong> <?php echo htmlspecialchars($booking['booking_id']); ?>
+                        </div>
+                        <div>
+                            <strong>Booking Date:</strong> <?php echo htmlspecialchars($booking['booking_date']); ?>
+                        </div>
+                    </div>
+                    <div class="booking-details">
+                        <div>
+                            <strong>Airline:</strong> <?php echo htmlspecialchars($booking['company_name']); ?>
+                        </div>
+                        <div>
+                            <strong>Flight Date:</strong> <?php echo htmlspecialchars($booking['departure_date']); ?>
+                        </div>
+                    </div>
+                    <div class="booking-details">
+                        <div>
+                            <strong>From:</strong> <?php echo htmlspecialchars($booking['departure_location']); ?>
+                        </div>
+                        <div>
+                            <strong>To:</strong> <?php echo htmlspecialchars($booking['arrival_location']); ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="no-bookings">
+                <p>You have no flight bookings yet.</p>
+            </div>
+        <?php endif; ?>
+        
+        <a href="flight_search.php" class="back-link">Book a New Flight</a>
+        <a href="login.php" class="back-link">Back to Dashboard</a>
+    </div>
+</body>
+</html>
+
+<?php
+$stmt->close();
+$conn->close();
+?>

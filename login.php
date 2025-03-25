@@ -117,6 +117,28 @@
             margin-bottom: 15px;
             text-align: center;
         }
+
+        .dashboard-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .dashboard-links a {
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+            text-decoration: none;
+            background-color: #4a90e2;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .dashboard-links a:hover {
+            background-color: #357ae8;
+        }
     </style>
 </head>
 <body>
@@ -124,10 +146,6 @@
         <h1>Login to Your Account</h1>
         
         <?php
-        $db_host = getenv('DB_HOST');
-        $db_user = getenv('DB_USER');
-        $db_pass = getenv('DB_PASS');
-        $db_name = getenv('DB_NAME');
         // Start session
         session_start();
         
@@ -142,7 +160,7 @@
         
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Database connection
-            $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+            $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
             
             // Check connection
             if ($conn->connect_error) {
@@ -247,8 +265,9 @@
             Don't have an account? <a href="signup.php">Sign up here</a>
         </div>
         <?php else: ?>
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="dashboard.php" class="btn">Go to Dashboard</a>
+        <div class="dashboard-links">
+            <a href="flight_search.php">Book a Flight</a>
+            <a href="my_bookings.php">My Bookings</a>
         </div>
         <div style="text-align: center; margin-top: 15px;">
             <a href="logout.php" style="color: #e74c3c; text-decoration: none;">Logout</a>

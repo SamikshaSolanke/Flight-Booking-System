@@ -123,10 +123,10 @@
         <p class="subtitle">Access your airline company dashboard</p>
         
         <?php
-        $db_host = getenv('DB_HOST');
-        $db_user = getenv('DB_USER');
-        $db_pass = getenv('DB_PASS');
-        $db_name = getenv('DB_NAME');        
+        // $db_host = getenv('DB_HOST');
+        // $db_user = getenv('DB_USER');
+        // $db_pass = getenv('DB_PASS');
+        // $db_name = getenv('DB_NAME');        
         // Start session
         session_start();
         
@@ -139,7 +139,7 @@
         
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Database connection
-            $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+            $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
             
             // Check connection
             if ($conn->connect_error) {
