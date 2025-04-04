@@ -24,7 +24,7 @@ if ($conn->connect_error) {
 }
 
 // Initialize variables
-$departure_date = $seats_no = $from_airport = $to_airport = "";
+$departure_date = $seats_no = $from_airport = $to_airport = $price = "";
 $error = "";
 $success = "";
 
@@ -52,28 +52,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $seats_no = trim($_POST["seats_no"]);
     $from_airport = trim($_POST["from_airport"]);
     $to_airport = trim($_POST["to_airport"]);
+    $price = trim($_POST["price"]);
     
     // Basic validation
-    if (empty($departure_date) || empty($seats_no) || empty($from_airport) || empty($to_airport)) {
+    if (empty($departure_date) || empty($seats_no) || empty($from_airport) || empty($to_airport) || empty($price)) {
         $error = "All fields are required";
     } elseif ($from_airport == $to_airport) {
         $error = "Departure and arrival airports cannot be the same";
     } elseif (!is_numeric($seats_no) || $seats_no <= 0) {
         $error = "Number of seats must be a positive number";
+    } elseif (!is_numeric($price) || $price <= 0) {
+        $error = "Price must be a positive number";
     } elseif (strtotime($departure_date) < strtotime(date('Y-m-d'))) {
         $error = "Departure date cannot be in the past";
     } else {
         // Insert the flight into the database
         $company_id = $_SESSION['company_id'];
         
-        $stmt = $conn->prepare("INSERT INTO Flights (company_id, departure_date, seats_no, from_airport_code, to_airport_code) 
-                              VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("isiss", $company_id, $departure_date, $seats_no, $from_airport, $to_airport);
+        $stmt = $conn->prepare("INSERT INTO Flights (company_id, departure_date, seats_no, from_airport_code, to_airport_code, price) 
+                              VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isissd", $company_id, $departure_date, $seats_no, $from_airport, $to_airport, $price);
         
         if ($stmt->execute()) {
             $success = "Flight added successfully!";
             // Clear form fields after successful submission
-            $departure_date = $seats_no = "";
+            $departure_date = $seats_no = $price = "";
             $from_airport = $to_airport = "";
         } else {
             $error = "Error: " . $stmt->error;
@@ -239,6 +242,11 @@ $conn->close();
                 <label for="seats_no">Number of Available Seats:</label>
                 <input type="number" id="seats_no" name="seats_no" value="<?php echo htmlspecialchars($seats_no); ?>" min="1" required>
             </div>
+
+            <div class="form-group">
+                <label for="price">Ticket Price ($):</label>
+                <input type="number" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>" min="0.01" step="0.01" required>
+            </div>
             
             <div class="form-group">
                 <label for="from_airport">Departure Airport:</label>
@@ -279,6 +287,7 @@ $conn->close();
             let hasErrors = false;
             const departureDate = document.getElementById('departure_date');
             const seatsNo = document.getElementById('seats_no');
+            const price = document.getElementById('price');
             const fromAirport = document.getElementById('from_airport');
             const toAirport = document.getElementById('to_airport');
             
@@ -295,6 +304,12 @@ $conn->close();
             // Check if seat number is valid
             if (seatsNo.value <= 0) {
                 addError(seatsNo, 'Number of seats must be a positive number');
+                hasErrors = true;
+            }
+            
+            // Check if price is valid
+            if (price.value <= 0) {
+                addError(price, 'Price must be a positive number');
                 hasErrors = true;
             }
             
