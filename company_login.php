@@ -115,6 +115,15 @@
             width: auto;
             margin-right: 10px;
         }
+        
+        .success-message {
+            color: #2ecc71;
+            background-color: #d5f5e3;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -123,21 +132,28 @@
         <p class="subtitle">Access your airline company dashboard</p>
         
         <?php
-        // $db_host = getenv('DB_HOST');
-        // $db_user = getenv('DB_USER');
-        // $db_pass = getenv('DB_PASS');
-        // $db_name = getenv('DB_NAME');        
         // Start session
         session_start();
         
+        // Variable to track authentication status
+        $authenticated = false;
+        
         // Check if company is already logged in
         if (isset($_SESSION['company_id'])) {
-            // Redirect to company dashboard
-            header("Location: company_dashboard.php");
-            exit();
+            // Set authentication flag
+            $authenticated = true;
+            echo "<div class='success-message'>You are logged in as " . htmlspecialchars($_SESSION['company_name']) . ".</div>";
+            
+            // Display dashboard link instead of immediate redirect
+            echo "<div style='text-align: center; margin-top: 15px;'>";
+            echo "<a href='company_dashboard.php' style='background-color: #4a90e2; color: white; text-decoration: none; padding: 12px 20px; border-radius: 4px; display: inline-block;'>Go to Dashboard</a>";
+            echo "</div>";
+            echo "<div style='text-align: center; margin-top: 15px;'>";
+            echo "<a href='logout.php' style='color: #e74c3c; text-decoration: none;'>Logout</a>";
+            echo "</div>";
         }
         
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && !$authenticated) {
             // Database connection
             $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
             
@@ -162,19 +178,30 @@
                 $errors[] = "Password is required";
             }
             
-            // If no validation errors, attempt to login
+            // If no validation errors, attempt to login using stored procedure
             if (empty($errors)) {
-                // Prepare SQL statement
-                $stmt = $conn->prepare("SELECT company_id, company_name, email, password FROM Companies WHERE email = ?");
-                $stmt->bind_param("s", $email);
+                // Call the stored procedure for company authentication
+                $stmt = $conn->prepare("CALL authenticate_user(?, ?, 'company')");
+                $stmt->bind_param("ss", $email, $password);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 
                 if ($result->num_rows == 1) {
                     $company = $result->fetch_assoc();
                     
+                    // Free the result set
+                    $result->free();
+                    $stmt->close();
+                    
+                    // Get the hashed password separately
+                    $passwordStmt = $conn->prepare("SELECT password FROM Companies WHERE email = ?");
+                    $passwordStmt->bind_param("s", $email);
+                    $passwordStmt->execute();
+                    $passwordResult = $passwordStmt->get_result();
+                    $passwordRow = $passwordResult->fetch_assoc();
+                    
                     // Verify password
-                    if (password_verify($password, $company['password'])) {
+                    if (password_verify($password, $passwordRow['password'])) {
                         // Password is correct, start a new session
                         
                         // Store data in session variables
@@ -190,17 +217,23 @@
                             setcookie("company_id", $company['company_id'], time() + (30 * 24 * 60 * 60), "/");
                         }
                         
-                        // Redirect to company dashboard
-                        header("Location: company_dashboard.php");
-                        exit();
+                        // Set authentication flag
+                        $authenticated = true;
+                        
+                        // Display success message instead of redirecting
+                        echo "<div class='success-message'>Login successful! Welcome, " . htmlspecialchars($company['company_name']) . ".</div>";
+                        echo "<div style='text-align: center; margin-top: 15px;'>";
+                        echo "<a href='company_dashboard.php' style='background-color: #4a90e2; color: white; text-decoration: none; padding: 12px 20px; border-radius: 4px; display: inline-block;'>Go to Dashboard</a>";
+                        echo "</div>";
                     } else {
                         $errors[] = "Invalid email or password";
                     }
+                    
+                    $passwordStmt->close(); // Close passwordStmt here
                 } else {
                     $errors[] = "Invalid email or password";
+                    $stmt->close(); // Close stmt here if result was empty
                 }
-                
-                $stmt->close();
             }
             
             // Display errors if any
@@ -218,6 +251,7 @@
         }
         ?>
         
+        <?php if (!$authenticated): ?>
         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
             <div class="form-group">
                 <label for="email">Business Email</label>
@@ -240,6 +274,7 @@
         <div class="signup-link">
             Need to register your company? <a href="company_signup.php">Sign up here</a>
         </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>

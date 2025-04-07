@@ -10,12 +10,6 @@ if (!isset($_SESSION['company_id'])) {
 }
 
 // Database connection
-// $db_host = getenv('DB_HOST');
-// $db_user = getenv('DB_USER');
-// $db_pass = getenv('DB_PASS');
-// $db_name = getenv('DB_NAME');
-
-// Create connection
 $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
 
 // Check connection
@@ -32,18 +26,20 @@ $flights_query = "
     SELECT f.flight_id,
            f.departure_date,
            f.seats_no, 
+           f.price,
            a1.airport_code as from_code,
            a1.City as from_place,
            a1.State as from_state,
            a2.airport_code as to_code,
            a2.City as to_place,
            a2.State as to_state,
-           COALESCE(b.booked_seats, 0) as booked_seats
+           COALESCE(b.booked_seats, 0) as booked_seats,
+           COALESCE(b.booking_revenue, 0) as booking_revenue
     FROM Flights f
     JOIN Airports a1 ON f.from_airport_code = a1.airport_code
     JOIN Airports a2 ON f.to_airport_code = a2.airport_code
     LEFT JOIN (
-        SELECT flight_id, COUNT(*) as booked_seats 
+        SELECT flight_id, COUNT(*) as booked_seats, SUM(price) as booking_revenue
         FROM Bookings 
         GROUP BY flight_id
     ) b ON f.flight_id = b.flight_id
@@ -70,9 +66,10 @@ $stmt->execute();
 $upcoming_result = $stmt->get_result();
 $upcoming_flights = $upcoming_result->fetch_assoc()['count'];
 
-// Calculate total seats and bookings
+// Calculate total seats, bookings, and revenue
 $total_seats = 0;
 $total_bookings = 0;
+$total_revenue = 0;
 $booking_rate = 0;
 
 // Create an array to store flights data for reuse
@@ -82,6 +79,7 @@ if ($result->num_rows > 0) {
         $flights[] = $row;
         $total_seats += $row['seats_no'];
         $total_bookings += $row['booked_seats'];
+        $total_revenue += $row['booking_revenue'];
     }
     
     // Calculate overall booking rate
@@ -287,6 +285,17 @@ $conn->close();
             margin-right: 5px;
         }
         
+        .cancel-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 5px;
+        }
+        
         .delete-btn {
             background-color: #dc3545;
             color: white;
@@ -309,6 +318,88 @@ $conn->close();
             color: white;
             text-decoration: none;
             margin-right: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+        
+        .form-actions button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .form-actions .cancel {
+            background-color: #ccc;
+            margin-right: 10px;
+        }
+        
+        .form-actions .save {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .price-column {
+            text-align: right;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -341,6 +432,10 @@ $conn->close();
                 <p>Total Bookings</p>
             </div>
             <div class="summary-card">
+                <h2>$<?php echo number_format($total_revenue, 2); ?></h2>
+                <p>Total Revenue</p>
+            </div>
+            <div class="summary-card">
                 <h2><?php echo $booking_rate; ?>%</h2>
                 <p>Overall Booking Rate</p>
             </div>
@@ -357,7 +452,9 @@ $conn->close();
                         <th>Flight ID</th>
                         <th>Route</th>
                         <th>Departure Date</th>
+                        <th>Price</th>
                         <th>Bookings</th>
+                        <th>Revenue</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -370,6 +467,7 @@ $conn->close();
                             }
                             
                             $date_class = strtotime($flight['departure_date']) < strtotime(date('Y-m-d')) ? 'date-past' : 'date-future';
+                            $is_past = strtotime($flight['departure_date']) < strtotime(date('Y-m-d'));
                         ?>
                         <tr>
                             <td>FLT-<?php echo $flight['flight_id']; ?></td>
@@ -379,6 +477,9 @@ $conn->close();
                             </td>
                             <td class="<?php echo $date_class; ?>">
                                 <?php echo date('M d, Y', strtotime($flight['departure_date'])); ?>
+                            </td>
+                            <td class="price-column">
+                                $<?php echo number_format($flight['price'], 2); ?>
                             </td>
                             <td>
                                 <div class="booking-status">
@@ -390,10 +491,16 @@ $conn->close();
                                     </div>
                                 </div>
                             </td>
+                            <td class="price-column">
+                                $<?php echo number_format($flight['booking_revenue'], 2); ?>
+                            </td>
                             <td class="action-cell">
-                                <!-- <a href="edit_flight.php?id=<?php echo $flight['flight_id']; ?>" class="edit-btn">Edit</a> -->
-                                <a href="delete_flight.php?id=<?php echo $flight['flight_id']; ?>" class="delete-btn" 
-                                   onclick="return confirm('Are you sure you want to delete this flight?');">Delete</a>
+                                <?php if (!$is_past): ?>
+                                    <button onclick="openEditModal(<?php echo $flight['flight_id']; ?>, '<?php echo addslashes($flight['departure_date']); ?>', <?php echo $flight['seats_no']; ?>, <?php echo $flight['price']; ?>)" class="edit-btn">Edit</button>
+                                    <button onclick="openCancelModal(<?php echo $flight['flight_id']; ?>, <?php echo $flight['booked_seats']; ?>)" class="cancel-btn">Cancel</button>
+                                <?php endif; ?>
+                                <!-- <a href="delete_flight.php?id=<?php echo $flight['flight_id']; ?>" class="delete-btn" 
+                                   onclick="return confirm('Are you sure you want to delete this flight?');">Delete</a> -->
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -407,5 +514,95 @@ $conn->close();
             </div>
         <?php endif; ?>
     </div>
+    
+    <!-- Edit Flight Modal -->
+    <div id="editFlightModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Flight Details</h2>
+            <form id="editFlightForm" action="update_flight.php" method="POST">
+                <input type="hidden" id="edit_flight_id" name="flight_id">
+                
+                <div class="form-group">
+                    <label for="departure_date">Departure Date:</label>
+                    <input type="date" id="departure_date" name="departure_date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="seats_no">Number of Seats:</label>
+                    <input type="number" id="seats_no" name="seats_no" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Price per Seat ($):</label>
+                    <input type="number" id="price" name="price" min="1" step="0.01" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="cancel" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Cancel Flight Modal -->
+    <div id="cancelFlightModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCancelModal()">&times;</span>
+            <h2>Cancel Flight</h2>
+            <p id="cancelMessage"></p>
+            <form id="cancelFlightForm" action="cancel_flight.php" method="POST">
+                <input type="hidden" id="cancel_flight_id" name="flight_id">
+                
+                <div class="form-actions">
+                    <button type="button" class="cancel" onclick="closeCancelModal()">No, Keep Flight</button>
+                    <button type="submit" class="save">Yes, Cancel Flight</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Edit Flight Modal Functions
+        function openEditModal(flightId, departureDate, seatsNo, price) {
+            document.getElementById('edit_flight_id').value = flightId;
+            document.getElementById('departure_date').value = departureDate;
+            document.getElementById('seats_no').value = seatsNo;
+            document.getElementById('price').value = price;
+            document.getElementById('editFlightModal').style.display = 'block';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editFlightModal').style.display = 'none';
+        }
+        
+        // Cancel Flight Modal Functions
+        function openCancelModal(flightId, bookedSeats) {
+            document.getElementById('cancel_flight_id').value = flightId;
+            let message = 'Are you sure you want to cancel this flight?';
+            
+            if (bookedSeats > 0) {
+                message += ' This flight has ' + bookedSeats + ' booking(s). All customers will be notified and refunded.';
+            }
+            
+            document.getElementById('cancelMessage').innerText = message;
+            document.getElementById('cancelFlightModal').style.display = 'block';
+        }
+        
+        function closeCancelModal() {
+            document.getElementById('cancelFlightModal').style.display = 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('editFlightModal')) {
+                closeEditModal();
+            }
+            if (event.target == document.getElementById('cancelFlightModal')) {
+                closeCancelModal();
+            }
+        }
+    </script>
 </body>
 </html>

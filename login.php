@@ -183,48 +183,64 @@
                 $errors[] = "Password is required";
             }
             
-            // If no validation errors, attempt to login
-            if (empty($errors)) {
-                // Prepare SQL statement
-                $stmt = $conn->prepare("SELECT user_id, name, email, password FROM Users WHERE email = ?");
-                $stmt->bind_param("s", $email);
-                $stmt->execute();
-                $result = $stmt->get_result();
+            // If no validation errors, attempt to login using stored procedure
+            // If no validation errors, attempt to login using stored procedure
+        if (empty($errors)) {
+            // Call the stored procedure for user authentication
+            $stmt = $conn->prepare("CALL authenticate_user(?, ?, 'user')");
+            $stmt->bind_param("ss", $email, $password);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows == 1) {
+                $user = $result->fetch_assoc();
                 
-                if ($result->num_rows == 1) {
-                    $user = $result->fetch_assoc();
+                // Free the result set
+                $result->free();
+                $stmt->close();
+                
+                // Get the hashed password separately
+                $passwordStmt = $conn->prepare("SELECT password FROM Users WHERE email = ?");
+                $passwordStmt->bind_param("s", $email);
+                $passwordStmt->execute();
+                $passwordResult = $passwordStmt->get_result();
+                $passwordRow = $passwordResult->fetch_assoc();
+                
+                // Verify password
+                if (password_verify($password, $passwordRow['password'])) {
+                    // Password is correct, start a new session
                     
-                    // Verify password
-                    if (password_verify($password, $user['password'])) {
-                        // Password is correct, start a new session
-                        
-                        // Store data in session variables
-                        $_SESSION['user_id'] = $user['user_id'];
-                        $_SESSION['name'] = $user['name'];
-                        $_SESSION['email'] = $user['email'];
-                        
-                        // If remember me is checked, set cookies
-                        if ($remember) {
-                            // Set cookies for 30 days
-                            setcookie("user_login", $email, time() + (30 * 24 * 60 * 60), "/");
-                            setcookie("user_id", $user['user_id'], time() + (30 * 24 * 60 * 60), "/");
-                        }
-                        
-                        // Set authentication flag
-                        $authenticated = true;
-                        
-                        // Display success message instead of redirecting
-                        echo "<div class='success-message'>Login successful! Welcome, " . htmlspecialchars($user['name']) . ".</div>";
-                        
-                    } else {
-                        $errors[] = "Invalid email or password";
+                    // Store data in session variables
+                    $_SESSION['user_id'] = $user['user_id'];
+                    $_SESSION['name'] = $user['name'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['user_type'] = 'user'; // Identify user type
+                    
+                    // If remember me is checked, set cookies
+                    if ($remember) {
+                        // Set cookies for 30 days
+                        setcookie("user_login", $email, time() + (30 * 24 * 60 * 60), "/");
+                        setcookie("user_id", $user['user_id'], time() + (30 * 24 * 60 * 60), "/");
                     }
+                    
+                    // Set authentication flag
+                    $authenticated = true;
+                    
+                    // Display success message instead of redirecting
+                    echo "<div class='success-message'>Login successful! Welcome, " . htmlspecialchars($user['name']) . ".</div>";
+                    
                 } else {
                     $errors[] = "Invalid email or password";
                 }
                 
-                $stmt->close();
+                $passwordStmt->close(); // Close only passwordStmt here
+            } else {
+                $errors[] = "Invalid email or password";
+                $stmt->close(); // Close stmt here only if the result was empty
             }
+            
+            // Remove the duplicate $stmt->close() at the end
+        }
             
             // Display errors if any
             if (!empty($errors)) {

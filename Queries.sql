@@ -71,3 +71,28 @@ INSERT INTO Airports (airport_code, City, State) VALUES
 ('IXC', 'Chandigarh', 'Chandigarh'),
 ('TRV', 'Thiruvananthapuram', 'Kerala'),
 ('PAT', 'Patna', 'Bihar');
+
+DELIMITER //
+CREATE PROCEDURE authenticate_user(
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(255),
+    IN p_user_type VARCHAR(10)
+)
+BEGIN
+    IF p_user_type = 'user' THEN
+        -- Authenticate regular user
+        SELECT user_id, name, email
+        FROM Users
+        WHERE email = p_email;
+    ELSEIF p_user_type = 'company' THEN
+        -- Authenticate company
+        SELECT company_id, company_name, email
+        FROM Companies
+        WHERE email = p_email;
+    ELSE
+        -- Invalid user type
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid user type specified';
+    END IF;
+END //
+DELIMITER ;
