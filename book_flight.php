@@ -8,8 +8,9 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Get flight ID from previous page
+// Get flight ID and price from previous page
 $flight_id = $_POST['flight_id'] ?? '';
+$price = $_POST['price'] ?? 0; // Get the price from the form
 
 if (empty($flight_id)) {
     die("No flight selected.");
@@ -23,7 +24,7 @@ $booking_status = "";
 $conn->begin_transaction();
 
 try {
-    // Check flight availability and get price
+    // Check flight availability and get flight details
     $flight_check = $conn->prepare("SELECT seats_no, price, departure_date, from_airport_code, to_airport_code FROM Flights WHERE flight_id = ? FOR UPDATE");
     $flight_check->bind_param("i", $flight_id);
     $flight_check->execute();
@@ -45,9 +46,9 @@ try {
     $update_seats->bind_param("i", $flight_id);
     $update_seats->execute();
 
-    // Create booking
-    $booking_query = $conn->prepare("INSERT INTO Bookings (user_id, flight_id) VALUES (?, ?)");
-    $booking_query->bind_param("ii", $_SESSION['user_id'], $flight_id);
+    // Create booking - now including the price in the INSERT statement
+    $booking_query = $conn->prepare("INSERT INTO Bookings (user_id, flight_id, Price) VALUES (?, ?, ?)");
+    $booking_query->bind_param("iii", $_SESSION['user_id'], $flight_id, $price);
     $booking_query->execute();
     $booking_id = $conn->insert_id;
 
@@ -246,7 +247,7 @@ $conn->close();
                 </div>
             </div>
             <div class="price">
-                Price: $<?php echo number_format($flight_details['price'], 2); ?>
+                Price: ₹<?php echo number_format($flight_details['price'], 2); ?>
             </div>
         </div>
         <?php endif; ?>

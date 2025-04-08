@@ -10,7 +10,8 @@ if (!isset($_SESSION['company_id'])) {
 }
 
 // Database connection
-$conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+// $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+include 'db_connection.php';
 
 // Check connection
 if ($conn->connect_error) {
@@ -432,7 +433,7 @@ $conn->close();
                 <p>Total Bookings</p>
             </div>
             <div class="summary-card">
-                <h2>$<?php echo number_format($total_revenue, 2); ?></h2>
+                <h2>₹<?php echo number_format($total_revenue, 2); ?></h2>
                 <p>Total Revenue</p>
             </div>
             <div class="summary-card">
@@ -479,7 +480,7 @@ $conn->close();
                                 <?php echo date('M d, Y', strtotime($flight['departure_date'])); ?>
                             </td>
                             <td class="price-column">
-                                $<?php echo number_format($flight['price'], 2); ?>
+                            ₹<?php echo number_format($flight['price'], 2); ?>
                             </td>
                             <td>
                                 <div class="booking-status">
@@ -492,7 +493,7 @@ $conn->close();
                                 </div>
                             </td>
                             <td class="price-column">
-                                $<?php echo number_format($flight['booking_revenue'], 2); ?>
+                            ₹<?php echo number_format($flight['booking_revenue'], 2); ?>
                             </td>
                             <td class="action-cell">
                                 <?php if (!$is_past): ?>
@@ -533,10 +534,10 @@ $conn->close();
                     <input type="number" id="seats_no" name="seats_no" min="1" required>
                 </div>
                 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="price">Price per Seat ($):</label>
                     <input type="number" id="price" name="price" min="1" step="0.01" required>
-                </div>
+                </div> -->
                 
                 <div class="form-actions">
                     <button type="button" class="cancel" onclick="closeEditModal()">Cancel</button>

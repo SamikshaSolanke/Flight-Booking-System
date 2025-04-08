@@ -15,7 +15,7 @@ if (empty($from_location) || empty($to_location) || empty($flight_date)) {
     die("Please fill all search criteria.");
 }
 // Query to find matching flights
-$flight_query = "SELECT f.flight_id, c.company_name, f.departure_date, f.seats_no, 
+$flight_query = "SELECT f.flight_id, c.company_name, f.departure_date, f.seats_no, f.Price,
                 a1.airport_code as from_code, a2.airport_code as to_code,
                 a1.City as from_city, a2.City as to_city
                 FROM Flights f
@@ -64,6 +64,22 @@ $result = $stmt->get_result();
             border: none;
             padding: 10px 20px;
             text-decoration: none;
+            cursor: pointer;
+        }
+        .price {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #e67e22;
+            margin-top: 8px;
+        }
+        .flight-details {
+            flex: 1;
+        }
+        .booking-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 </head>
@@ -81,17 +97,21 @@ $result = $stmt->get_result();
     <?php if ($result->num_rows > 0): ?>
         <?php while ($flight = $result->fetch_assoc()): ?>
             <div class="flight-card">
-                <div>
+                <div class="flight-details">
                     <h3><?php echo htmlspecialchars($flight['company_name']); ?></h3>
                     <p>From: <?php echo htmlspecialchars($flight['from_city'] . ' (' . $flight['from_code'] . ')'); ?></p>
                     <p>To: <?php echo htmlspecialchars($flight['to_city'] . ' (' . $flight['to_code'] . ')'); ?></p>
                     <p>Date: <?php echo htmlspecialchars($flight['departure_date']); ?></p>
                     <p>Available Seats: <?php echo htmlspecialchars($flight['seats_no']); ?></p>
                 </div>
-                <form method="POST" action="book_flight.php">
-                    <input type="hidden" name="flight_id" value="<?php echo $flight['flight_id']; ?>">
-                    <input type="submit" value="Book" class="book-btn">
-                </form>
+                <div class="booking-section">
+                    <div class="price">₹<?php echo htmlspecialchars($flight['Price']); ?></div>
+                    <form method="POST" action="book_flight.php">
+                        <input type="hidden" name="flight_id" value="<?php echo $flight['flight_id']; ?>">
+                        <input type="hidden" name="price" value="<?php echo $flight['Price']; ?>">
+                        <input type="submit" value="Book" class="book-btn">
+                    </form>
+                </div>
             </div>
         <?php endwhile; ?>
     <?php else: ?>

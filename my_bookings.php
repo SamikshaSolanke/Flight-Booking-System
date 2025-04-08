@@ -8,7 +8,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Database connection
-$conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+// $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+include 'db_connection.php';
 
 // Check connection
 if ($conn->connect_error) {
@@ -46,6 +47,15 @@ $stmt = $conn->prepare($bookings_query);
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Check for cancel action
+if (isset($_GET['cancel_success'])) {
+    $message = "Your booking has been successfully cancelled.";
+    $alert_class = "success";
+} elseif (isset($_GET['cancel_error'])) {
+    $message = "Error cancelling your booking. Please try again.";
+    $alert_class = "error";
+}
 ?>
 
 <!DOCTYPE html>
@@ -107,6 +117,81 @@ $result = $stmt->get_result();
             color: #4a90e2;
             text-decoration: none;
         }
+        .cancel-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .cancel-button:hover {
+            background-color: #c0392b;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .confirm-cancel {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .cancel-modal {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -123,6 +208,12 @@ $result = $stmt->get_result();
     <br>
     <div class="container">
         <h1>My Flight Bookings</h1>
+        
+        <?php if (isset($message)): ?>
+            <div class="alert <?php echo $alert_class; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
+        <?php endif; ?>
         
         <?php if ($result->num_rows > 0): ?>
             <?php while ($booking = $result->fetch_assoc()): ?>
@@ -151,6 +242,9 @@ $result = $stmt->get_result();
                             <strong>To:</strong> <?php echo htmlspecialchars($booking['to_place']); ?> (<?php echo htmlspecialchars($booking['to_code']); ?>)
                         </div>
                     </div>
+                    <div class="actions">
+                        <button class="cancel-button" onclick="showCancelModal(<?php echo htmlspecialchars($booking['booking_id']); ?>)">Cancel Booking</button>
+                    </div>
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
@@ -162,6 +256,39 @@ $result = $stmt->get_result();
         <a href="flight_search.php" class="back-link">Book a New Flight</a>
         <a href="login.php" class="back-link">Back to Dashboard</a>
     </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <h2>Cancel Booking</h2>
+            <p>Are you sure you want to cancel this booking? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <form id="cancelForm" action="cancel_booking.php" method="POST">
+                    <input type="hidden" id="booking_id" name="booking_id" value="">
+                    <button type="submit" class="confirm-cancel">Yes, Cancel Booking</button>
+                </form>
+                <button class="cancel-modal" onclick="hideCancelModal()">No, Keep Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCancelModal(bookingId) {
+            document.getElementById('booking_id').value = bookingId;
+            document.getElementById('cancelModal').style.display = 'block';
+        }
+
+        function hideCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('cancelModal')) {
+                hideCancelModal();
+            }
+        }
+    </script>
 </body>
 </html>
 

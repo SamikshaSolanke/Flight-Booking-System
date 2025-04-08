@@ -16,7 +16,8 @@ if (!isset($_SESSION['company_id'])) {
 // $db_name = getenv('DB_NAME');
 
 // Create connection
-$conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+// $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
+include 'db_connection.php';
 
 // Check connection
 if ($conn->connect_error) {
@@ -244,7 +245,7 @@ $conn->close();
             </div>
 
             <div class="form-group">
-                <label for="price">Ticket Price ($):</label>
+                <label for="price">Ticket Price (₹):</label>
                 <input type="number" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>" min="0.01" step="0.01" required>
             </div>
             
