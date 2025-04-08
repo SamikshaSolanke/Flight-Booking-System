@@ -2,7 +2,7 @@
 $servername = "XX"; // Replace the XX with the required for example "localhost" in most of the case
 $username = "XX";  // Replace with your MySQL username for example "root" in most of the case
 $password = "XX";  // Replace the XX with the required MySQL password of yours
-$dbname = "XX"; // Replace the XX with the required name of the database you have created
+$dbname = "DBMS_PROJECT"; 
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
