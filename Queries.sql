@@ -1,7 +1,10 @@
+--QUERY TO CREATE DATABASE--
 CREATE DATABASE DBMS_PROJECT;
 
+--QUERY TO USE THAT DATABASE--
 USE DBMS_PROJECT;
 
+--QUERY TO CREATE Users TABLE--
 CREATE TABLE Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -11,6 +14,7 @@ CREATE TABLE Users (
     password VARCHAR(255) NOT NULL
 );
 
+--QUERY TO CREATE Companies TABLE--
 CREATE TABLE Companies (
     company_id INT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(100) NOT NULL,
@@ -18,43 +22,39 @@ CREATE TABLE Companies (
     password VARCHAR(255) NOT NULL
 );
 
+--QUERY TO CREATE Airports TABLE--
 CREATE TABLE Airports (
     airport_code VARCHAR(10) PRIMARY KEY,
-    from_place VARCHAR(100) NOT NULL,
-    to_place VARCHAR(100) NOT NULL
+    City VARCHAR(255) NOT NULL,
+    State VARCHAR(255) NOT NULL
 );
 
-DROP TABLE Airports;
-
-ALTER TABLE Airports
-DROP COLUMN from_place,
-DROP COLUMN to_place;
-
-ALTER TABLE Airports
-ADD COLUMN City VARCHAR(255) NOT NULL,
-ADD COLUMN State VARCHAR(255) NOT NULL;
-
+--QUERY TO CREATE Flights TABLE--
 CREATE TABLE Flights (
-    flight_id INT AUTO_INCREMENT PRIMARY KEY,
+    flight_id INT PRIMARY KEY AUTO_INCREMENT,
     company_id INT NOT NULL,
     departure_date DATE NOT NULL,
     seats_no INT NOT NULL,
     from_airport_code VARCHAR(10) NOT NULL,
     to_airport_code VARCHAR(10) NOT NULL,
+    Price INT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES Companies(company_id),
     FOREIGN KEY (from_airport_code) REFERENCES Airports(airport_code),
     FOREIGN KEY (to_airport_code) REFERENCES Airports(airport_code)
 );
 
+--QUERY TO CREATE Bookings TABLE--
 CREATE TABLE Bookings (
-    booking_id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     flight_id INT NOT NULL,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Price INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (flight_id) REFERENCES Flights(flight_id)
 );
 
+--QUERY TO ADD Airports IN THE Airports TABLE--
 INSERT INTO Airports (airport_code, City, State) VALUES
 ('DEL', 'Delhi', 'Delhi'),
 ('BOM', 'Mumbai', 'Maharashtra'),
@@ -72,6 +72,7 @@ INSERT INTO Airports (airport_code, City, State) VALUES
 ('TRV', 'Thiruvananthapuram', 'Kerala'),
 ('PAT', 'Patna', 'Bihar');
 
+--QUERY TO CREATE A STORED PROCEDURE FOR LOGIN--
 DELIMITER //
 CREATE PROCEDURE authenticate_user(
     IN p_email VARCHAR(100),
