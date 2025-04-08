@@ -12,7 +12,6 @@ if (!isset($_SESSION['company_id'])) {
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Database connection
-    // $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
     include 'db_connection.php';
 
     // Check connection
