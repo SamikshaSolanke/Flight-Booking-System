@@ -10,7 +10,6 @@ if (!isset($_SESSION['company_id'])) {
 }
 
 // Database connection
-// $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
 include 'db_connection.php';
 
 // Check connection
