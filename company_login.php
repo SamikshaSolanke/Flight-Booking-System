@@ -155,7 +155,6 @@
         
         if ($_SERVER["REQUEST_METHOD"] == "POST" && !$authenticated) {
             // Database connection
-            // $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
             include 'db_connection.php';
             
             // Check connection
