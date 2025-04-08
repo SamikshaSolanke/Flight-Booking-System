@@ -9,14 +9,7 @@ if (!isset($_SESSION['company_id'])) {
     exit();
 }
 
-// Database connection
-// $db_host = getenv('DB_HOST');
-// $db_user = getenv('DB_USER');
-// $db_pass = getenv('DB_PASS');
-// $db_name = getenv('DB_NAME');
-
 // Create connection
-// $conn = new mysqli("localhost", "root", "Samruddhi@09", "DBMS_PROJECT");
 include 'db_connection.php';
 
 // Check connection
